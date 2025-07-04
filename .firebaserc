@@ -1,0 +1,8 @@
+{
+  "projects": {
+    "default": "alphamanager-c2ca9",
+    "alphamanager": "alphamanager-c2ca9"
+  },
+  "targets": {},
+  "etags": {}
+}

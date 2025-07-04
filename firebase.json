@@ -1,0 +1,32 @@
+{
+  "hosting": {
+    "site": "alphamanager-site",
+    "public": "build",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  },
+  "functions": { // PROMIJENJENO: Sada je objekt, ne niz
+    "source": "functions",
+    "runtime": "nodejs20",
+    // UKLONJENO: "platform": "gcfv1", - ovo je uzrokovalo konflikt s 2. generacijom SDK-a
+    "codebase": "default",
+    "ignore": [
+      "node_modules",
+      ".git",
+      "firebase-debug.log",
+      "firebase-debug.*.log",
+      "*.local"
+    ],
+    "timeoutSeconds": 300,
+    "invoker": "public"
+  }
+}
