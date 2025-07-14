@@ -25,7 +25,8 @@ import {
   runTransaction,
   setDoc
 } from "firebase/firestore";
-// Uklonjen: import { getFunctions, httpsCallable } from "firebase/functions";
+// Uklonjeni importi za Firebase Cloud Functions jer sada koristimo Netlify Functions
+// import { getFunctions, httpsCallable } from "firebase/functions";
 
 
 // Authorized email for access. Only this email will have access to the application data.
@@ -1043,7 +1044,8 @@ export default function App() {
   const [firebaseApp, setFirebaseApp] = useState(null);
   const [auth, setAuth] = useState(null);
   const [db, setDb] = useState(null);
-  // Uklonjen: const [functions, setFunctions] = useState(null); // Dodano za Cloud Functions
+  // Uklonjen state za Cloud Functions jer sada koristimo Netlify Functions
+  // const [functions, setFunctions] = useState(null); 
   const [userId, setUserId] = useState(null);
   const [appId, setAppId] = useState(null);
   const [loadingFirebase, setLoadingFirebase] = useState(true);
@@ -1184,7 +1186,8 @@ export default function App() {
         const app = initializeApp(firebaseConfig);
         const authInstance = getAuth(app);
         const dbInstance = getFirestore(app);
-        // Uklonjen: const functionsInstance = getFunctions(app); // Dodana inicijalizacija za Cloud Functions
+        // Uklonjena inicijalizacija za Cloud Functions
+        // const functionsInstance = getFunctions(app); 
         // Ako želite testirati funkcije lokalno s Emulator Suiteom (za razvoj):
         // import { connectFunctionsEmulator } from "firebase/functions";
         // if (process.env.NODE_ENV === 'development') {
@@ -1195,7 +1198,8 @@ export default function App() {
         setFirebaseApp(app);
         setAuth(authInstance);
         setDb(dbInstance);
-        // Uklonjen: setFunctions(functionsInstance); // Spremanje instance funkcija u state
+        // Uklonjeno spremanje instance funkcija u state
+        // setFunctions(functionsInstance); 
 
         const currentAppId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         setAppId(currentAppId);
@@ -2061,16 +2065,16 @@ export default function App() {
     }
   };
 
-  // WooCommerce Sync Function - AŽURIRANO ZA HTTP POZIV
+  // WooCommerce Sync Function - AŽURIRANO ZA NETLIFY FUNCTIONS
   const handleTriggerWooCommerceSync = async () => {
-    // Provjerite je li Firebase aplikacija inicijalizirana
+    // Provjerite je li Firebase aplikacija inicijalizirana (za Firestore)
     if (!firebaseApp || !userId || !appId) {
       showToast('Firebase nije spreman. Molimo pričekajte.', 'error');
       return;
     }
     
-    // WooCommerce API ključevi su sada potrebni u Cloud funkciji,
-    // ali ih i dalje provjeravamo ovdje kako bismo korisniku dali ranu povratnu informaciju
+    // WooCommerce API ključevi su sada potrebni samo u Netlify funkciji,
+    // ali ih i dalje provjeravamo ovdje ako želite ranu povratnu informaciju korisniku
     if (!woocommerceApiKeys.consumerKey || !woocommerceApiKeys.consumerSecret) {
       showToast('Molimo unesite WooCommerce Consumer Key i Consumer Secret u postavkama.', 'warning');
       return;
@@ -2092,27 +2096,26 @@ export default function App() {
         }
       });
 
-      console.log("Podaci za slanje WooCommerce Cloud Functionu:", productsToUpdate);
+      console.log("Podaci za slanje Netlify Functionu:", productsToUpdate);
 
-      // --- STVARNI HTTP POZIV NA CLOUD FUNCTION ---
-      // URL funkcije će biti nešto poput:
-      // https://us-central1-YOUR_PROJECT_ID.cloudfunctions.net/updateProductStock
-      const functionUrl = `https://us-central1-${firebaseApp.options.projectId}.cloudfunctions.net/updateProductStock`;
+      // --- STVARNI HTTP POZIV NA NETLIFY FUNCTION ---
+      // Netlify Functions su dostupne na /.netlify/functions/your-function-name
+      const functionUrl = '/.netlify/functions/updateProductStock'; // PUTANJA JE RELATIVNA NA VAŠ HOSTING
 
       const response = await fetch(functionUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // Za HTTP funkcije, ako želite autentikaciju, morali biste poslati ID token:
+          // Ako želite autentikaciju, morali biste poslati ID token iz Firebasea
           // 'Authorization': `Bearer ${await auth.currentUser.getIdToken()}`
         },
-        body: JSON.stringify({ productsToUpdate: productsToUpdate }), // Pošaljite kao objekt s ključem productsToUpdate
+        body: JSON.stringify({ productsToUpdate: productsToUpdate }),
       });
 
       const result = await response.json();
       // --- KRAJ STVARNOG HTTP POZIVA ---
 
-      console.log("Rezultat sinkronizacije s Cloud Functiona:", result);
+      console.log("Rezultat sinkronizacije s Netlify Functiona:", result);
 
       if (response.ok) { // Provjerite je li HTTP status 2xx
         if (result && result.message) {
@@ -2121,14 +2124,13 @@ export default function App() {
             showToast('WooCommerce sinkronizacija dovršena.', 'success');
         }
       } else {
-        // Ako HTTP status nije 2xx, to je greška
         const errorMessage = result.error || 'Nepoznata greška sa servera.';
         showToast(`Greška tijekom sinkronizacije: ${errorMessage}`, 'error');
         console.error("Greška detalji:", result.details);
       }
 
     } catch (e) {
-      console.error("Greška tijekom WooCommerce sinkronizacije (poziv Cloud Functiona):", e);
+      console.error("Greška tijekom WooCommerce sinkronizacije (poziv Netlify Functiona):", e);
       showToast(`Greška tijekom sinkronizacije: ${e.message}`, 'error');
     }
   };
@@ -2370,7 +2372,7 @@ export default function App() {
           <input
             type="text"
             id="physicalPurchaseTemplateSearch"
-            name="physicalPurchaseTemplateSearch"
+            name="physicalPurchaseTemplateSearch" // Dodano ime za input
             value={physicalPurchaseTemplateSearchQuery}
             onChange={(e) => setPhysicalPurchaseTemplateSearchQuery(e.target.value)}
             className="p-3 border border-gray-300 rounded-md w-full focus:ring-blue-500 focus:border-blue-500"
@@ -2810,7 +2812,7 @@ export default function App() {
             <input
               type="text"
               id="webPurchaseTemplateSearch"
-              name="webPurchaseTemplateSearch"
+              name="webPurchaseTemplateSearch" // Dodano ime za input
               value={webPurchaseTemplateSearchQuery}
               onChange={(e) => setWebPurchaseTemplateSearchQuery(e.target.value)}
               className="p-3 border border-gray-300 rounded-md w-full focus:ring-blue-500 focus:border-blue-500"
