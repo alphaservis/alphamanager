@@ -1,21 +1,9 @@
 [build]
-  # Naredba za instalaciju ovisnosti i izgradnju projekta
-  # Prvo pokrenite npm install za instalaciju svih paketa (uključujući react-scripts)
-  # Zatim pokrenite npm run build za izgradnju React aplikacije
   command = "npm install && npm run build"
-  
-  # Direktorij u koji se spremaju izgrađene datoteke (obično 'build' za Create React App)
   publish = "build"
-
-  # Direktorij za Netlify funkcije (ako ih koristite)
-  # Ako imate Netlify funkcije u 'netlify/functions' direktoriju, ostavite ovo.
-  # Ako nemate Netlify funkcije, možete ukloniti ovu liniju.
   functions = "netlify/functions"
 
 [build.environment]
-  # Ovdje definirajte varijable okoline koje su potrebne tijekom builda
-  # Ove varijable će biti dostupne vašem build procesu
-   WC_CONSUMER_KEY = "ck_b62b46d7b6d6b449fba09064520e0ef526eefbd8"
+  WC_CONSUMER_KEY = "ck_b62b46d7b6d6b449fba09064520e0ef526eefbd8"
   WC_CONSUMER_SECRET = "cs_3c5568f212f76cb2a6c66f476624b7dad7d26f4c"
   WOO_STORE_URL = "https://alphaservis.hr/"
-  # Dodajte sve ostale varijable okoline koje su vam potrebne
