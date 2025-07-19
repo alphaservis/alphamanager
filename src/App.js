@@ -97,17 +97,14 @@ const ConfirmationModal = ({ message, onConfirm, onCancel }) => {
 };
 
 // PrintPurchaseBlockModal Component
-const PrintPurchaseBlockModal = ({ device, onClose, purchaseBlockText, companyInfo }) => {
+const PrintPurchaseBlockModal = ({ device, onClose, purchaseBlockText, companyInfo, showToast }) => {
   const printRef = useRef();
 
   const handlePrint = async () => {
     const input = printRef.current;
     if (input) {
       if (typeof window.html2canvas === 'undefined' || typeof window.jsPDF === 'undefined') {
-        // Using showToast instead of alert for better UX
-        // The original code used alert, but I'm replacing it as per instructions.
-        // showToast("Biblioteke za generiranje PDF-a se još učitavaju. Molimo pričekajte trenutak i pokušajte ponovo.", "warning");
-        alert("Biblioteke za generiranje PDF-a se još učitavaju. Molimo pričekajte trenutak i pokušajte ponovo.");
+        showToast("Biblioteke za generiranje PDF-a se još učitavaju. Molimo pričekajte trenutak i pokušajte ponovo.", "warning");
         return;
       }
       
@@ -133,8 +130,7 @@ const PrintPurchaseBlockModal = ({ device, onClose, purchaseBlockText, companyIn
         pdf.save(`Otkupni_blok_${device.orderNumber || device.id}.pdf`);
       }).catch(error => {
         console.error("Error generating PDF:", error);
-        // showToast("Greška pri generiranju PDF-a. Molimo pokušajte ponovo.", "error");
-        alert("Greška pri generiranju PDF-a. Molimo pokušajte ponovo.");
+        showToast("Greška pri generiranju PDF-a. Molimo pokušajte ponovo.", "error");
       });
     }
   };
@@ -219,7 +215,7 @@ const PrintPurchaseBlockModal = ({ device, onClose, purchaseBlockText, companyIn
 
 
 // DeviceDetailsPage Component - full page for displaying and editing device details
-const DeviceDetailsPage = ({ device, onUpdateDevice, onGoBack, employees, onDeleteDevice, purchaseBlockText, companyInfo, onStatusChangeTriggerWooCommerceSync }) => {
+const DeviceDetailsPage = ({ device, onUpdateDevice, onGoBack, employees, onDeleteDevice, purchaseBlockText, companyInfo, onStatusChangeTriggerWooCommerceSync, showToast }) => {
   const [editedDevice, setEditedDevice] = useState({
     ...device,
     additionalCost: device.additionalCost || 0,
@@ -262,14 +258,12 @@ const DeviceDetailsPage = ({ device, onUpdateDevice, onGoBack, employees, onDele
     if (newStatus === 'Prodan') {
       const salePrice = parseFloat(editedDevice.actualSalePrice);
       if (isNaN(salePrice) || salePrice <= 0) {
-        setShowSalePricePrompt(true);
+        setShowSalePricePrompt(true); // This will trigger the InfoModal
         return;
       }
       // If status is 'Prodan' and soldBy is empty, show a warning or set a default
       if (!editedDevice.soldBy) {
-        // You might want to show a toast message here instead of preventing status change
-        // For now, I'll allow it but encourage user to fill it.
-        // showToast('Molimo odaberite djelatnika koji je prodao uređaj.', 'warning');
+        showToast('Molimo odaberite djelatnika koji je prodao uređaj.', 'warning');
       }
     } else {
       // If not 'Prodan', clear soldBy
@@ -350,7 +344,7 @@ const DeviceDetailsPage = ({ device, onUpdateDevice, onGoBack, employees, onDele
           className="px-3 py-1.5 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition duration-300 flex items-center text-sm"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 = 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+            <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
           </svg>
           Povratak na Zalihe
         </button>
@@ -469,22 +463,25 @@ const DeviceDetailsPage = ({ device, onUpdateDevice, onGoBack, employees, onDele
             <label className="block">Ime i prezime osobe: <input type="text" name="personWhoSold" value={editedDevice.personWhoSold} onChange={handleEditChange} className="p-2 border rounded-md w-full text-sm" /></label>
             <label className="block">OIB Osobe: <input type="text" name="oibWhoSold" value={editedDevice.oibWhoSold} onChange={handleEditChange} maxLength="11" className="p-2 border rounded-md w-full text-sm" /></label>
             <label className="block">Adresa Osobe: <input type="text" name="personAddress" value={editedDevice.personAddress} onChange={handleEditChange} className="p-2 border rounded-md w-full text-sm" /></label>
-            <label className="block">Otkupio/la (Djelatnik):
-              <select name="personName" value={editedDevice.personName} onChange={handleEditChange} className="p-2 border rounded-md w-full text-sm">
-                <option value="">Odaberite djelatnika</option>
-                {employees.map(emp => (
-                  <option key={emp.id} value={emp.name}>{emp.name}</option>
-                ))}
-              </select>
-            </label>
-            <label className="block">Tko je testirao:
+            <div> {/* Added this div to wrap the label and select for 'Otkupio/la (Djelatnik)' */}
+              <label className="block">Otkupio/la (Djelatnik):
+                <select name="personName" value={editedDevice.personName} onChange={handleEditChange} className="p-2 border rounded-md w-full text-sm">
+                  <option value="">Odaberite djelatnika</option>
+                  {employees.map(emp => (
+                    <option key={emp.id} value={emp.name}>{emp.name}</option>
+                  ))}
+                </select>
+              </label> {/* Corrected: Closing label tag added here */}
+            </div> {/* Corrected: Closing div for the field */}
+            <div>
+              <label htmlFor="testedBy" className="block text-sm font-medium text-gray-700 mb-1">Tko je testirao:</label>
               <select name="testedBy" value={editedDevice.testedBy || ''} onChange={handleEditChange} className="p-2 border rounded-md w-full text-sm">
                 <option value="">Odaberite djelatnika</option>
                 {employees.map(emp => (
                   <option key={emp.id} value={emp.name}>{emp.name}</option>
                 ))}
               </select>
-            </label>
+            </div>
           </div>
         </div>
 
@@ -567,6 +564,7 @@ const DeviceDetailsPage = ({ device, onUpdateDevice, onGoBack, employees, onDele
           onClose={() => setShowPrintModal(false)}
           purchaseBlockText={purchaseBlockText}
           companyInfo={companyInfo} // Pass companyInfo prop
+          showToast={showToast} // Pass showToast to PrintPurchaseBlockModal
         />
       )}
     </div>
@@ -793,7 +791,7 @@ const StatisticsPage = ({ devices, employees }) => {
     const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust for Monday start of week (ISO)
     return new Date(d.getFullYear(), d.getMonth(), diff);
   };
-  const getStartOfMonth = (date) => new Date(date.getFullYear(), date.getMonth(), 1);
+  // Removed: const getStartOfMonth = (date) => new Date(date.getFullYear(), date.getMonth(), 1); // This function was unused.
 
   // New function to calculate summary for a given subset of devices and type (sold or purchased)
   const calculateSubsetSummary = useCallback((devicesSubset, type) => {
@@ -865,7 +863,7 @@ const StatisticsPage = ({ devices, employees }) => {
     });
 
     return { purchasedInPeriod, soldInPeriod };
-  }, [devices, startDate, endDate]);
+  }, [devices, startDate, endDate, getStartOfDay, getStartOfWeek]); // Added getStartOfDay, getStartOfWeek to dependencies
 
   // Calculate stats for Today
   const todayData = useMemo(() => getPeriodData('today'), [getPeriodData]);
@@ -1073,7 +1071,7 @@ export default function App() {
   // State for the next available order number
   const [nextOrderNumber, setNextOrderNumber] = useState(1);
   // State for the editable purchase block text
-  const [purchaseBlockText, setPurchaseBlockText] = useState("Svojim potpisom dajem privolu MCloud j.d.o.o. za prikupljanje i obradu mojih podataka u svrhu otkupa mobitela kao i suglasnost za čuvanje mojih podataka u arhivi otkupljenih uređaja.");
+  const [purchaseBlockText, setPurchaseBlockText] = useState(`Svojim potpisom dajem privolu MCloud j.d.o.o. za prikupljanje i obradu mojih podataka u svrhu otkupa mobitela kao i suglasnost za čuvanje mojih podataka u arhivi otkupljenih uređaja.`);
   // State for company global information
   const [companyInfo, setCompanyInfo] = useState({
     name: "Mcloud j.d.o.o.",
@@ -1316,7 +1314,7 @@ export default function App() {
       if (docSnap.exists()) {
         setPurchaseBlockText(docSnap.data().text);
       } else {
-        setDoc(purchaseBlockTextDocRef, { text: "Svojim potpisom dajem privolu MCloud j.d.o.o. za prikupljanje i obradu mojih podataka u svrhu otkupa mobitela kao i suglasnost za čuvanje mojih podataka u arhivi otkupljenih uređaja." });
+        setDoc(purchaseBlockTextDocRef, { text: `Svojim potpisom dajem privolu MCloud j.d.o.o. za prikupljanje i obradu mojih podataka u svrhu otkupa mobitela kao i suglasnost za čuvanje mojih podataka u arhivi otkupljenih uređaja.` });
       }
     }, (error) => {
       console.error("Error fetching purchase block text:", error);
@@ -1422,7 +1420,7 @@ export default function App() {
   }, [webPurchaseTemplateSearchQuery, devices]);
 
 
-  const getUniqueDeviceTemplates = () => {
+  const getUniqueDeviceTemplates = useCallback(() => { // Wrapped in useCallback
     const uniqueMap = new Map();
     devices.forEach(device => {
       const key = `${device.brand}-${device.model}-${device.color}-${device.storageGB}`;
@@ -1437,7 +1435,7 @@ export default function App() {
       }
     });
     return Array.from(uniqueMap.values());
-  };
+  }, [devices]); // Dependency: devices
 
   const filteredUniqueDeviceTemplates = getUniqueDeviceTemplates().filter(template => {
     const query = uniqueDeviceTableSearchQuery.toLowerCase();
@@ -1454,7 +1452,8 @@ export default function App() {
       return;
     }
 
-    const currentTemplates = getUniqueDeviceTemplates();
+    const currentTemplates = getUniqueDeviceTemplates(); // This is the function that was missing from dependencies
+
     const newRowDataState = { ...uniqueDeviceRowData };
 
     currentTemplates.forEach(template => {
@@ -1545,7 +1544,7 @@ export default function App() {
     if (JSON.stringify(newRowDataState) !== JSON.stringify(uniqueDeviceRowData)) {
       setUniqueDeviceRowData(newRowDataState);
     }
-  }, [devices, uniqueDeviceRowData]); // Added uniqueDeviceRowData back to dependencies, as it needs to react to changes
+  }, [devices, uniqueDeviceRowData, getUniqueDeviceTemplates]); // Added getUniqueDeviceTemplates to dependencies
 
 
   const handleNewPhysicalPurchaseDeviceChange = (e) => {
@@ -3396,6 +3395,7 @@ export default function App() {
               purchaseBlockText={purchaseBlockText}
               companyInfo={companyInfo} // Pass companyInfo prop
               onStatusChangeTriggerWooCommerceSync={handleTriggerWooCommerceSync} // Pass sync function
+              showToast={showToast} // Pass showToast to DeviceDetailsPage
             />
           ) : (
             <>
