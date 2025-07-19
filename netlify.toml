@@ -4,6 +4,7 @@
   functions = "netlify/functions"
 
 [build.environment]
-  WC_CONSUMER_KEY = "ck_b62b46d7b6d6b449fba09064520e0ef526eefbd8"
-  WC_CONSUMER_SECRET = "cs_3c5568f212f76cb2a6c66f476624b7dad7d26f4c"
-  WOO_STORE_URL = "https://alphaservis.hr/"
+  # Ovdje NE SMIJE biti WC_CONSUMER_KEY i WC_CONSUMER_SECRET
+  NETLIFY_DATABASE_URL = "..."
+  NETLIFY_DATABASE_URL_UNPOOLED = "..."
+  WOO_STORE_URL = "..."
