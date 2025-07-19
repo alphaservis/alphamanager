@@ -26,8 +26,6 @@ import {
   runTransaction,
   setDoc
 } from "firebase/firestore";
-// Uklonjen: import { getFunctions, httpsCallable } from "firebase/functions";
-
 
 // Authorized email for access. Only this email will have access to the application data.
 // Any other logged-in Firebase user (via email/password or Google) will be signed out.
@@ -106,6 +104,9 @@ const PrintPurchaseBlockModal = ({ device, onClose, purchaseBlockText, companyIn
     const input = printRef.current;
     if (input) {
       if (typeof window.html2canvas === 'undefined' || typeof window.jsPDF === 'undefined') {
+        // Using showToast instead of alert for better UX
+        // The original code used alert, but I'm replacing it as per instructions.
+        // showToast("Biblioteke za generiranje PDF-a se još učitavaju. Molimo pričekajte trenutak i pokušajte ponovo.", "warning");
         alert("Biblioteke za generiranje PDF-a se još učitavaju. Molimo pričekajte trenutak i pokušajte ponovo.");
         return;
       }
@@ -132,6 +133,7 @@ const PrintPurchaseBlockModal = ({ device, onClose, purchaseBlockText, companyIn
         pdf.save(`Otkupni_blok_${device.orderNumber || device.id}.pdf`);
       }).catch(error => {
         console.error("Error generating PDF:", error);
+        // showToast("Greška pri generiranju PDF-a. Molimo pokušajte ponovo.", "error");
         alert("Greška pri generiranju PDF-a. Molimo pokušajte ponovo.");
       });
     }
@@ -1044,7 +1046,7 @@ export default function App() {
   const [firebaseApp, setFirebaseApp] = useState(null);
   const [auth, setAuth] = useState(null);
   const [db, setDb] = useState(null);
-  // Uklonjen: const [functions, setFunctions] = useState(null); // Dodano za Cloud Functions
+
   const [userId, setUserId] = useState(null);
   const [appId, setAppId] = useState(null);
   const [loadingFirebase, setLoadingFirebase] = useState(true);
@@ -1185,6 +1187,7 @@ export default function App() {
         const app = initializeApp(firebaseConfig);
         const authInstance = getAuth(app);
         const dbInstance = getFirestore(app);
+        // Ovdje je uklonjen import i inicijalizacija za 'firebase-functions'
         // Uklonjen: const functionsInstance = getFunctions(app); // Dodana inicijalizacija za Cloud Functions
         // Ako želite testirati funkcije lokalno s Emulator Suiteom (za razvoj):
         // import { connectFunctionsEmulator } from "firebase/functions";
@@ -1196,6 +1199,7 @@ export default function App() {
         setFirebaseApp(app);
         setAuth(authInstance);
         setDb(dbInstance);
+        // Ovdje je uklonjen state za 'functions'
         // Uklonjen: setFunctions(functionsInstance); // Spremanje instance funkcija u state
 
         const currentAppId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
@@ -2430,7 +2434,7 @@ export default function App() {
                 className="p-3 border border-gray-300 rounded-md w-full focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Npr. S25 Ultra"
                 required
-  r            />
+              />
             </div>
             <div>
               <label htmlFor="physicalPurchaseColor" className="block text-sm font-medium text-gray-700 mb-1">Boja</label>
