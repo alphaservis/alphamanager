@@ -258,7 +258,7 @@ const DeviceDetailsPage = ({ device, onUpdateDevice, onGoBack, employees, onDele
     if (newStatus === 'Prodan') {
       const salePrice = parseFloat(editedDevice.actualSalePrice);
       if (isNaN(salePrice) || salePrice <= 0) {
-        setShowSalePricePrompt(true); // This will trigger the InfoModal
+        showToast("Molimo unesite Prodajnu Cijenu (stvarnu) prije označavanja kao prodano.", "error");
         return;
       }
       // If status is 'Prodan' and soldBy is empty, show a warning or set a default
@@ -438,7 +438,7 @@ const DeviceDetailsPage = ({ device, onUpdateDevice, onGoBack, employees, onDele
                 Rezerviran
               </button>
             </div>
-          </div>
+          </div> {/* Closing div for the status buttons flex container */}
           {editedDevice.status === 'Prodan' && (
             <div className="mt-4">
               <label className="block">Prodano od (Djelatnik):
@@ -784,13 +784,13 @@ const StatisticsPage = ({ devices, employees }) => {
   const [endDate, setEndDate] = useState('');
 
   // Helper to get start of day, week, month
-  const getStartOfDay = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
-  const getStartOfWeek = (date) => {
+  const getStartOfDay = useCallback((date) => new Date(date.getFullYear(), date.getMonth(), date.getDate()), []);
+  const getStartOfWeek = useCallback((date) => {
     const d = new Date(date);
     const day = d.getDay(); // Sunday - Saturday : 0 - 6
     const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust for Monday start of week (ISO)
     return new Date(d.getFullYear(), d.getMonth(), diff);
-  };
+  }, []);
   // Removed: const getStartOfMonth = (date) => new Date(date.getFullYear(), date.getMonth(), 1); // This function was unused.
 
   // New function to calculate summary for a given subset of devices and type (sold or purchased)
@@ -970,7 +970,7 @@ const StatisticsPage = ({ devices, employees }) => {
           <div className="mt-6 p-4 bg-purple-50 rounded-lg border border-purple-200">
             <h4 className="text-lg font-semibold text-purple-700 mb-2">Statistika za odabrani raspon:</h4>
             <p className="text-gray-800"><span className="font-bold">{customRangeSalesStats.count}</span> prodanih uređaja</p>
-            <p className="text-gray-800"><span className="font-bold">{customRangePurchaseStats.count}</span> otkupljenih uređaja</p>
+            <p className="text-800"><span className="font-bold">{customRangePurchaseStats.count}</span> otkupljenih uređaja</p>
             <p className="text-gray-800">Ostvarena marža: <span className="font-bold">{customRangeSalesStats.totalMargin.toFixed(2)}€</span></p>
           </div>
         )}
